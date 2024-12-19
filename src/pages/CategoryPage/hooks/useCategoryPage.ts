@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { CategoryItem, FilterState, SortConfig } from '../types';
 import { parseCategoryExcel } from '../utils/excel/parseCategoryExcel';
 import { saveCategoryItems, getCategoryItems, deleteCategoryItem } from '../../../services/firebase/categoryItems';
@@ -20,89 +20,19 @@ export const useCategoryPage = () => {
     color: null
   });
 
-  // Charger les données initiales
-  const loadItems = async () => {
-    try {
-      const data = await getCategoryItems();
-      setItems(data);
-    } catch (err) {
-      setError((err as Error).message);
-    }
-  };
+  // Memoized filter options to prevent unnecessary recalculations
+  const filterOptions = useMemo(() => ({
+    brands: [...new Set(items.map(item => item.brand))].sort(),
+    states: [...new Set(items.map(item => item.state))].sort(),
+    materials: [...new Set(items.map(item => item.material))].sort(),
+    colors: [...new Set(items.map(item => item.color))].sort()
+  }), [items]);
 
-  useEffect(() => {
-    loadItems();
-  }, []);
-
-  // Options de filtres disponibles
-  const filterOptions = useMemo(() => {
-    return {
-      brands: [...new Set(items.map(item => item.brand))].sort(),
-      states: [...new Set(items.map(item => item.state))].sort(),
-      materials: [...new Set(items.map(item => item.material))].sort(),
-      colors: [...new Set(items.map(item => item.color))].sort()
-    };
-  }, [items]);
-
-  // Gérer la suppression
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteCategoryItem(id);
-      await loadItems(); // Recharger la liste après la suppression
-    } catch (err) {
-      setError((err as Error).message);
-    }
-  };
-
-  // Gérer l'import de fichiers
-  const handleImport = async (files: FileList) => {
-    setIsImporting(true);
-    setError(null);
-    setImportStats(null);
-
-    try {
-      let allItems: CategoryItem[] = [];
-      
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (!file.name.match(/\.(xlsx|xls)$/i)) {
-          throw new Error(`Le fichier "${file.name}" n'est pas un fichier Excel valide.`);
-        }
-        
-        const items = await parseCategoryExcel(file);
-        allItems = [...allItems, ...items];
-      }
-
-      if (allItems.length > 0) {
-        const stats = await saveCategoryItems(allItems);
-        setImportStats(stats);
-        await loadItems();
-      } else {
-        throw new Error("Aucun article valide trouvé dans le(s) fichier(s).");
-      }
-    } catch (err) {
-      setError((err as Error).message);
-      console.error(err);
-    } finally {
-      setIsImporting(false);
-    }
-  };
-
-  // Gérer le tri
-  const handleSort = (key: keyof CategoryItem) => {
-    setSortConfig(current => ({
-      key,
-      direction: current.key === key && current.direction === 'ascending' 
-        ? 'descending' 
-        : 'ascending'
-    }));
-  };
-
-  // Filtrer et trier les éléments
+  // Memoized filtered and sorted items
   const filteredAndSortedItems = useMemo(() => {
     let result = [...items];
 
-    // Appliquer les filtres
+    // Apply filters
     if (filters.search) {
       const searchTerm = filters.search.toLowerCase();
       result = result.filter(item => 
@@ -127,7 +57,7 @@ export const useCategoryPage = () => {
       result = result.filter(item => item.color === filters.color);
     }
 
-    // Appliquer le tri
+    // Apply sorting
     result.sort((a, b) => {
       const aValue = a[sortConfig.key];
       const bValue = b[sortConfig.key];
@@ -139,6 +69,73 @@ export const useCategoryPage = () => {
 
     return result;
   }, [items, filters, sortConfig]);
+
+  // Memoized handlers
+  const handleSort = useCallback((key: keyof CategoryItem) => {
+    setSortConfig(current => ({
+      key,
+      direction: current.key === key && current.direction === 'ascending' 
+        ? 'descending' 
+        : 'ascending'
+    }));
+  }, []);
+
+  const handleDelete = useCallback(async (id: string) => {
+    try {
+      await deleteCategoryItem(id);
+      setItems(current => current.filter(item => item.id !== id));
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  }, []);
+
+  const handleImport = useCallback(async (files: FileList) => {
+    setIsImporting(true);
+    setError(null);
+    setImportStats(null);
+
+    try {
+      let allItems: CategoryItem[] = [];
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.name.match(/\.(xlsx|xls)$/i)) {
+          throw new Error(`Le fichier "${file.name}" n'est pas un fichier Excel valide.`);
+        }
+        
+        const items = await parseCategoryExcel(file);
+        allItems = [...allItems, ...items];
+      }
+
+      if (allItems.length > 0) {
+        const stats = await saveCategoryItems(allItems);
+        setImportStats(stats);
+        
+        // Update local state directly instead of refetching
+        setItems(current => [...current, ...allItems]);
+      } else {
+        throw new Error("Aucun article valide trouvé dans le(s) fichier(s).");
+      }
+    } catch (err) {
+      setError((err as Error).message);
+      console.error(err);
+    } finally {
+      setIsImporting(false);
+    }
+  }, []);
+
+  // Initial data load
+  useEffect(() => {
+    const loadItems = async () => {
+      try {
+        const data = await getCategoryItems();
+        setItems(data);
+      } catch (err) {
+        setError((err as Error).message);
+      }
+    };
+    loadItems();
+  }, []);
 
   return {
     items: filteredAndSortedItems,

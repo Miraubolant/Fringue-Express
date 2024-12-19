@@ -6,8 +6,19 @@ interface LinkButtonProps {
   className?: string;
 }
 
-export const LinkButton: React.FC<LinkButtonProps> = ({ url, className = '' }) => {
+export const LinkButton: React.FC<LinkButtonProps> = ({ url = '', className = '' }) => {
   const getSourceStyle = () => {
+    if (!url) {
+      return {
+        bg: 'bg-gray-500/10',
+        hoverBg: 'hover:bg-gray-500/20',
+        text: 'text-gray-400',
+        hoverText: 'hover:text-gray-300',
+        border: 'border-gray-500/20',
+        hoverBorder: 'hover:border-gray-500/30'
+      };
+    }
+
     const normalizedUrl = url.toLowerCase();
     if (normalizedUrl.includes('vinted')) {
       return {
@@ -40,6 +51,8 @@ export const LinkButton: React.FC<LinkButtonProps> = ({ url, className = '' }) =
   };
 
   const styles = getSourceStyle();
+
+  if (!url) return null;
 
   return (
     <a

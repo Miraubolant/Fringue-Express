@@ -113,21 +113,30 @@ export const Sidebar: React.FC = () => {
           ))}
         </div>
 
-        {/* Toggle Button */}
+        {/* Footer */}
         <div className="p-4 border-t border-gray-700/50">
-          <button
-            onClick={toggle}
-            className="flex items-center justify-center px-4 py-3 text-sm font-medium rounded-xl text-gray-400 hover:text-white hover:bg-gray-700/30 transition-all duration-200 w-full"
-          >
-            {isCollapsed ? (
-              <PanelLeftOpen className="h-5 w-5" />
-            ) : (
-              <div className="flex items-center">
-                <PanelLeftClose className="h-5 w-5" />
-                <span className="ml-3">Réduire</span>
-              </div>
+          <div className="flex flex-col gap-4">
+            <button
+              onClick={toggle}
+              className="flex items-center justify-center px-4 py-3 text-sm font-medium rounded-xl text-gray-400 hover:text-white hover:bg-gray-700/30 transition-all duration-200 w-full"
+            >
+              {isCollapsed ? (
+                <PanelLeftOpen className="h-5 w-5" />
+              ) : (
+                <div className="flex items-center">
+                  <PanelLeftClose className="h-5 w-5" />
+                  <span className="ml-3">Réduire</span>
+                </div>
+              )}
+            </button>
+
+            {!isCollapsed && (
+              <p className="text-xs text-center text-gray-500">
+                Créé par{' '}
+                <span className="font-medium text-gray-400">Victor Mirault</span>
+              </p>
             )}
-          </button>
+          </div>
         </div>
       </div>
     </aside>

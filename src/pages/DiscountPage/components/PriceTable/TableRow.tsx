@@ -8,12 +8,12 @@ import { useDiscountStore } from '../../../../store/discountStore';
 
 interface TableRowProps {
   item: PriceAnalysis;
+  discountPercentage: number | null;
 }
 
-export const TableRow: React.FC<TableRowProps> = ({ item }) => {
+export const TableRow: React.FC<TableRowProps> = ({ item, discountPercentage }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { addItem, removeItem, isSelected } = useSelectionStore();
-  const { discountPercentage } = useDiscountStore();
   const selected = isSelected(item.reference);
 
   const getMarginClass = (margin: number) => {
@@ -35,15 +35,21 @@ export const TableRow: React.FC<TableRowProps> = ({ item }) => {
     }
   };
 
+  const handleRowClick = () => {
+    if (item.links?.length) {
+      setIsExpanded(!isExpanded);
+    }
+  };
+
   return (
     <>
       <tr 
+        onClick={handleRowClick}
         className={`
-          transition-colors duration-200
           ${item.links?.length ? 'cursor-pointer' : ''}
           ${selected ? 'bg-blue-500/10 hover:bg-blue-500/20' : 'hover:bg-gray-700/20'}
+          transition-colors duration-200
         `}
-        onClick={() => item.links?.length && setIsExpanded(!isExpanded)}
       >
         <td className="px-6 py-4 text-sm text-white">
           <div className="flex items-center gap-3">

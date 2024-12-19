@@ -28,7 +28,7 @@ export const ExpandedDetails: React.FC<ExpandedDetailsProps> = ({ links }) => {
               <h4 className="text-sm font-medium text-gray-200 truncate">
                 {link.source}
               </h4>
-              <LinkButton href={link.url} />
+              {link.url && <LinkButton url={link.url} />}
             </div>
 
             {/* Prix et détails */}
