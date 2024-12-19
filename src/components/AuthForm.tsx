@@ -1,0 +1,1 @@
+// Ce fichier peut être supprimé car il est dupliqué avec src/components/auth/AuthForm.tsx
