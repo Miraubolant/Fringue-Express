@@ -4,13 +4,25 @@ import { dashboardStats } from '../../config/dashboard';
 import { useAnalyticsStats } from '../../hooks/useAnalyticsStats';
 
 export const StatsGrid: React.FC = () => {
-  const { totalItems, loading } = useAnalyticsStats();
+  const { totalItems, categoryItems, brandCount, loading } = useAnalyticsStats();
 
   const stats = dashboardStats.map(stat => {
-    if (stat.name === 'Articles analysés') {
+    if (stat.name === 'Articles analysés Arlettie') {
       return {
         ...stat,
         value: loading ? '...' : totalItems.toLocaleString('fr-FR')
+      };
+    }
+    if (stat.name === 'Articles catégorisés') {
+      return {
+        ...stat,
+        value: loading ? '...' : categoryItems.toLocaleString('fr-FR')
+      };
+    }
+    if (stat.name === 'Marques') {
+      return {
+        ...stat,
+        value: loading ? '...' : brandCount.toLocaleString('fr-FR')
       };
     }
     return stat;

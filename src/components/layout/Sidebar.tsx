@@ -6,7 +6,8 @@ import {
   Percent, 
   Database,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  ShoppingBag
 } from 'lucide-react';
 import { useSidebarStore } from '../../store/sidebarStore';
 
@@ -34,13 +35,34 @@ export const Sidebar: React.FC = () => {
   return (
     <aside 
       className={`
-        fixed top-16 bottom-0 left-0 z-30
+        fixed top-0 bottom-0 left-0 z-30
         bg-gray-800/50 backdrop-blur-sm border-r border-gray-700/50
         transition-all duration-300 ease-in-out
         ${isCollapsed ? 'w-20' : 'w-64'}
       `}
     >
       <div className="flex flex-col h-full">
+        {/* Logo */}
+        <div className="h-16 flex items-center px-4">
+          <Link to="/dashboard" className="flex items-center gap-3">
+            <div className="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg shadow-blue-500/25">
+              <ShoppingBag className="w-5 h-5 text-white" />
+            </div>
+            
+            {!isCollapsed && (
+              <div className="flex flex-col min-w-0">
+                <h1 className="text-base font-bold text-white leading-none tracking-tight truncate">
+                  Fringue Express
+                </h1>
+                <span className="text-xs text-gray-400 font-medium truncate">
+                  Analyseur de prix
+                </span>
+              </div>
+            )}
+          </Link>
+        </div>
+
+        {/* Navigation */}
         <div className="flex-1 py-6 overflow-y-auto custom-scrollbar">
           {navigation.map((section, index) => (
             <div key={section.category} className={`px-4 ${index > 0 ? 'mt-6' : ''}`}>
@@ -91,6 +113,7 @@ export const Sidebar: React.FC = () => {
           ))}
         </div>
 
+        {/* Toggle Button */}
         <div className="p-4 border-t border-gray-700/50">
           <button
             onClick={toggle}

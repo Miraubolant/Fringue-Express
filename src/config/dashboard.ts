@@ -1,31 +1,31 @@
-import { BarChart2, TrendingUp, Package, Users } from 'lucide-react';
+import { BarChart2, Building, Package, Database } from 'lucide-react';
 
 export const dashboardStats = [
   { 
-    name: 'Articles analysés', 
+    name: 'Articles analysés Arlettie', 
     value: '0',
     icon: Package, 
     change: 'Total', 
     changeType: 'neutral' as const
   },
   { 
-    name: 'Prix moyen', 
-    value: '---', 
-    icon: BarChart2, 
-    change: 'À venir', 
+    name: 'Articles catégorisés', 
+    value: '0', 
+    icon: Database, 
+    change: 'Total', 
     changeType: 'neutral' as const
   },
   { 
-    name: 'Marge moyenne', 
-    value: '---', 
-    icon: TrendingUp, 
-    change: 'À venir', 
+    name: 'Marques', 
+    value: '0', 
+    icon: Building, 
+    change: 'Total', 
     changeType: 'neutral' as const
   },
   { 
     name: 'Vendeurs actifs', 
     value: '---', 
-    icon: Users, 
+    icon: BarChart2, 
     change: 'À venir', 
     changeType: 'neutral' as const
   }

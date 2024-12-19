@@ -1,20 +1,55 @@
 import React from 'react';
-import { Filter } from 'lucide-react';
+import { CategoryFilters } from './components/CategoryFilters';
+import { CategoryTable } from './components/CategoryTable';
+import { ImportFeedback } from './components/ImportFeedback';
+import { useCategoryPage } from './hooks/useCategoryPage';
+import { SelectionAnalysis } from '../../components/analysis/SelectionAnalysis';
 
 export const CategoryPage: React.FC = () => {
+  const {
+    items,
+    sortConfig,
+    filters,
+    filterOptions,
+    setFilters,
+    handleSort,
+    handleImport,
+    handleDelete,
+    isImporting,
+    error,
+    importStats
+  } = useCategoryPage();
+
   return (
-    <div className="min-h-[calc(100vh-10rem)] flex items-center justify-center p-6">
-      <div className="flex flex-col items-center justify-center p-12 bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 max-w-lg w-full">
-        <div className="w-16 h-16 flex items-center justify-center bg-purple-500/10 rounded-xl mb-4">
-          <Filter className="w-8 h-8 text-purple-400" />
-        </div>
-        <h2 className="text-xl font-semibold text-white mb-2">
-          En cours de développement
-        </h2>
-        <p className="text-gray-400 text-center">
-          Cette fonctionnalité sera bientôt disponible. Elle vous permettra d'analyser vos produits par catégorie pour une meilleure gestion de votre catalogue.
-        </p>
+    <div className="space-y-4 pt-24 pb-32"> {/* Added pt-24 for top padding */}
+      <div className="space-y-4">
+        <CategoryFilters
+          filters={filters}
+          onFilterChange={setFilters}
+          options={filterOptions}
+          onImport={handleImport}
+          isImporting={isImporting}
+        />
+
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+            <p className="text-red-400 text-sm">{error}</p>
+          </div>
+        )}
+
+        {importStats && (
+          <ImportFeedback error={null} stats={importStats} />
+        )}
+
+        <CategoryTable
+          items={items}
+          sortConfig={sortConfig}
+          onSort={handleSort}
+          onDelete={handleDelete}
+        />
       </div>
+
+      <SelectionAnalysis />
     </div>
   );
 };

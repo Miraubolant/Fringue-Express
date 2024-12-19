@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { LogOut } from 'lucide-react';
+import { LogOut, Bell, Search } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
-import { Logo } from '../ui/Logo';
 import { useSidebarStore } from '../../store/sidebarStore';
 import { useLocation } from 'react-router-dom';
 
@@ -48,23 +47,38 @@ export const Header: React.FC = () => {
       `}
     >
       <div className="h-full flex items-center">
-        <div className={`transition-all duration-300 ease-in-out ${isCollapsed ? 'w-20' : 'w-64'} px-4 flex items-center`}>
-          <Logo />
-        </div>
+        <div className={`transition-all duration-300 ease-in-out ${isCollapsed ? 'w-20' : 'w-64'}`} />
 
         <div className="flex-1 flex items-center justify-between px-6">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-px bg-gray-700/50"></div>
+          <div className="flex items-center gap-4">
             <h1 className="text-xl font-semibold text-white">{pageTitle}</h1>
           </div>
 
-          <button
-            onClick={() => signOut()}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700/50 rounded-lg transition-all duration-200"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Déconnexion</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
+              title="Rechercher"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+            
+            <button
+              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
+              title="Notifications"
+            >
+              <Bell className="w-5 h-5" />
+            </button>
+
+            <div className="h-6 w-px bg-gray-700/50 mx-2" />
+
+            <button
+              onClick={() => signOut()}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700/50 rounded-lg transition-all duration-200"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Déconnexion</span>
+            </button>
+          </div>
         </div>
       </div>
     </header>
