@@ -1,33 +1,53 @@
 import React from 'react';
-import { TableHeader } from './TableHeader';
-import { TableRow } from './TableRow';
-import { DiscountItem, SortConfig } from '../types';
+import { DiscountTableHeader } from './DiscountTableHeader';
+import { DiscountTableRow } from './DiscountTableRow';
+import { RemiseItem, SortConfig } from '../../../types/remise';
+import { Pagination } from '../../../components/ui/Pagination';
+import { usePagination } from '../../../hooks/usePagination';
 
 interface DiscountTableProps {
-  items: DiscountItem[];
+  items: RemiseItem[];
   sortConfig: SortConfig;
-  onSort: (key: keyof DiscountItem) => void;
+  onSort: (key: keyof RemiseItem) => void;
 }
 
 export const DiscountTable: React.FC<DiscountTableProps> = ({
   items,
   sortConfig,
-  onSort,
+  onSort
 }) => {
+  const {
+    currentPage,
+    totalPages,
+    paginatedItems,
+    setPage
+  } = usePagination(items, { itemsPerPage: 50 });
+
   return (
     <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead>
-            <TableHeader sortConfig={sortConfig} onSort={onSort} />
-          </thead>
+          <DiscountTableHeader sortConfig={sortConfig} onSort={onSort} />
           <tbody className="divide-y divide-gray-700/50">
-            {items.map((item) => (
-              <TableRow key={item.id} item={item} />
+            {paginatedItems.map((item, index) => (
+              <DiscountTableRow 
+                key={`${item.reference}-${index}`} 
+                item={item} 
+                index={index}
+              />
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
+      )}
     </div>
   );
 };

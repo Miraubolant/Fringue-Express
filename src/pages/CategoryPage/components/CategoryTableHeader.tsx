@@ -44,6 +44,9 @@ export const CategoryTableHeader: React.FC<CategoryTableHeaderProps> = ({
         <th className="px-6 py-4 text-right text-sm font-medium text-gray-400">
           {renderSortButton('Prix', 'price')}
         </th>
+        <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">
+          {renderSortButton('Date', 'status')}
+        </th>
         <th className="px-6 py-4 text-center text-sm font-medium text-gray-400">
           Liens
         </th>

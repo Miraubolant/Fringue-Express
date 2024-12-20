@@ -1,83 +1,47 @@
-import { useState, useCallback, useMemo } from 'react';
-import { PriceAnalysis, SortConfig, FilterConfig } from '../types';
-import { parsePriceAnalysis, parsePriceLinks } from '../utils/parseExcelData';
-import { calculateMargin } from '../utils/calculations';
-import { savePriceAnalysis } from '../../../services/firebase/priceAnalysis';
-import { savePriceLinks } from '../../../services/firebase/priceLinks';
-import { useFirebaseData } from '../../../hooks/useFirebaseData';
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import { RemiseItem, SortConfig, FilterConfig } from '../../../types/remise';
+import { parseDiscountExcel } from '../utils/excel/parseDiscountExcel';
+import { saveRemiseItems, getRemiseItems } from '../../../services/firebase/remiseItems';
+import { calculateMargin, calculateDiscountedPrice } from '../utils/calculations';
+import { useDiscountStore } from '../../../store/discountStore';
 
 export const useDiscountPage = () => {
-  const { 
-    data: firebaseData, 
-    loading: isLoadingData, 
-    error: firebaseError,
-    refresh,
-    isRefreshing 
-  } = useFirebaseData();
-  
+  const [items, setItems] = useState<RemiseItem[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [isImporting, setIsImporting] = useState(false);
-  const [importError, setImportError] = useState<string | null>(null);
-  const [importStats, setImportStats] = useState<{
-    analysis: { added: number; skipped: number; };
-    links: { added: number; skipped: number; };
-  } | null>(null);
-  
   const [sortConfig, setSortConfig] = useState<SortConfig>({
-    key: 'margin',
-    direction: 'descending',
+    key: 'reference',
+    direction: 'ascending'
   });
-  
   const [filters, setFilters] = useState<FilterConfig>({
     search: '',
-    discountPercentage: null,
     brand: null
   });
 
-  const availableBrands = useMemo(() => {
-    const brands = new Set(firebaseData.map(item => item.brand));
-    return Array.from(brands).sort();
-  }, [firebaseData]);
+  const { discountPercentage } = useDiscountStore();
 
-  const handleAnalysisFileImport = useCallback(async (files: FileList) => {
-    setIsImporting(true);
-    setImportError(null);
-    setImportStats(null);
-
-    try {
-      let analysisStats = { added: 0, skipped: 0 };
-      let linksStats = { added: 0, skipped: 0 };
-      
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (!file.name.match(/\.(xlsx|xls)$/i)) {
-          throw new Error(`Le fichier "${file.name}" n'est pas un fichier Excel valide.`);
-        }
-        
-        if (file.name.toLowerCase().includes('lien') || file.name.toLowerCase().includes('link')) {
-          const links = await parsePriceLinks(file);
-          linksStats = await savePriceLinks(links);
-        } else {
-          const data = await parsePriceAnalysis(file);
-          analysisStats = await savePriceAnalysis(data);
-        }
+  // Charger les données au montage
+  useEffect(() => {
+    const loadItems = async () => {
+      try {
+        const data = await getRemiseItems();
+        setItems(data);
+      } catch (err) {
+        setError((err as Error).message);
       }
+    };
+    loadItems();
+  }, []);
 
-      setImportStats({ analysis: analysisStats, links: linksStats });
-      
-      // Rafraîchir les données après l'import
-      await refresh();
-      
-    } catch (err) {
-      setImportError((err as Error).message || 'Erreur lors de l\'importation des fichiers.');
-      console.error(err);
-    } finally {
-      setIsImporting(false);
-    }
-  }, [refresh]);
+  const availableBrands = useMemo(() => {
+    const brands = new Set(items.map(item => item.brand));
+    return Array.from(brands).sort();
+  }, [items]);
 
   const filteredAndSortedItems = useMemo(() => {
-    let result = [...firebaseData];
+    let result = [...items];
 
+    // Appliquer les filtres
     if (filters.search) {
       const searchTerm = filters.search.toLowerCase();
       result = result.filter(item => 
@@ -90,42 +54,64 @@ export const useDiscountPage = () => {
       result = result.filter(item => item.brand === filters.brand);
     }
 
-    result = result.map(item => ({
+    // Calculer les marges pour le tri
+    const itemsWithMargin = result.map(item => ({
       ...item,
-      margin: calculateMargin(item.priceBrand, item.priceArlettie, filters.discountPercentage)
+      calculatedMargin: calculateMargin(
+        item.priceBrand,
+        calculateDiscountedPrice(item.priceArlettie, discountPercentage)
+      )
     }));
 
-    result.sort((a, b) => {
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
+    // Appliquer le tri
+    itemsWithMargin.sort((a, b) => {
+      let aValue = a[sortConfig.key];
+      let bValue = b[sortConfig.key];
+
+      // Utiliser la marge calculée pour le tri si nécessaire
+      if (sortConfig.key === 'margin') {
+        aValue = a.calculatedMargin;
+        bValue = b.calculatedMargin;
+      }
 
       if (aValue < bValue) return sortConfig.direction === 'ascending' ? -1 : 1;
       if (aValue > bValue) return sortConfig.direction === 'ascending' ? 1 : -1;
       return 0;
     });
 
-    return result;
-  }, [firebaseData, sortConfig, filters]);
+    // Retourner les items sans la marge calculée
+    return itemsWithMargin.map(({ calculatedMargin, ...item }) => item);
+  }, [items, filters, sortConfig, discountPercentage]);
 
   return {
     items: filteredAndSortedItems,
     sortConfig,
     filters,
     availableBrands,
-    handleSort: useCallback((key: keyof PriceAnalysis) => {
-      setSortConfig(currentConfig => ({
+    handleSort: useCallback((key: keyof RemiseItem) => {
+      setSortConfig(current => ({
         key,
-        direction: currentConfig.key === key && currentConfig.direction === 'ascending'
+        direction: current.key === key && current.direction === 'ascending'
           ? 'descending'
           : 'ascending'
       }));
     }, []),
-    handleAnalysisFileImport,
+    handleImport: useCallback(async (file: File) => {
+      setIsImporting(true);
+      setError(null);
+
+      try {
+        const importedItems = await parseDiscountExcel(file);
+        await saveRemiseItems(importedItems);
+        setItems(prevItems => [...prevItems, ...importedItems]);
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setIsImporting(false);
+      }
+    }, []),
     setFilters,
-    isLoading: isLoadingData || isImporting,
-    error: firebaseError || importError,
-    importStats,
-    refresh,
-    isRefreshing
+    isImporting,
+    error
   };
 };

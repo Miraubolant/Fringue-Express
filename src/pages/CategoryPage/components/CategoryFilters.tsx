@@ -2,7 +2,7 @@ import React from 'react';
 import { Search, Upload, X } from 'lucide-react';
 import { FilterState } from '../types';
 import { Input } from '../../../components/ui/Input';
-import { FilterSelect } from '../../../components/category/FilterSelect';
+import { FilterSelect } from './FilterSelect';
 
 interface CategoryFiltersProps {
   filters: FilterState;
@@ -12,6 +12,7 @@ interface CategoryFiltersProps {
     states: string[];
     materials: string[];
     colors: string[];
+    statuses: string[];
   };
   onImport: (files: FileList) => void;
   isImporting: boolean;
@@ -25,8 +26,7 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
   isImporting
 }) => {
   return (
-    <div className="bg-gradient-to-r from-gray-800/50 to-gray-800/30 
-                    backdrop-blur-sm rounded-xl border border-gray-700/50 p-4 mb-4">
+    <div className="bg-gradient-to-r from-gray-800/50 to-gray-800/30 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4 mb-4">
       <div className="flex flex-col gap-4">
         {/* Première ligne : Recherche et Import */}
         <div className="flex items-center gap-4">
@@ -39,8 +39,7 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
               placeholder="Rechercher un article..."
               value={filters.search || ''}
               onChange={(e) => onFilterChange({ ...filters, search: e.target.value })}
-              className="pl-10 h-10 bg-gray-800/50 border-gray-700/50 
-                        focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20"
+              className="pl-10 h-10 bg-gray-800/50 border-gray-700/50 focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20"
             />
             {filters.search && (
               <button
@@ -83,7 +82,7 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
         </div>
 
         {/* Deuxième ligne : Filtres */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <FilterSelect
             label="Marque"
             value={filters.brand}
@@ -108,6 +107,13 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
             value={filters.color}
             options={options.colors}
             onChange={(value) => onFilterChange({ ...filters, color: value })}
+            type="color"
+          />
+          <FilterSelect
+            label="Date de mise en ligne"
+            value={filters.status}
+            options={options.statuses}
+            onChange={(value) => onFilterChange({ ...filters, status: value })}
           />
         </div>
       </div>

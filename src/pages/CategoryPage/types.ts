@@ -7,6 +7,7 @@ export interface CategoryItem {
   color: string;
   price: number;
   link: string | null;
+  status: string | null; // Ajout du champ status
 }
 
 export interface FilterState {
@@ -15,6 +16,7 @@ export interface FilterState {
   state: string | null;
   material: string | null;
   color: string | null;
+  status: string | null; // Ajout du filtre status
 }
 
 export interface SortConfig {

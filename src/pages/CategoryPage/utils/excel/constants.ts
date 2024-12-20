@@ -5,5 +5,6 @@ export const CATEGORY_EXCEL_COLUMNS = {
   material: ['Matière', 'Matiere', 'Material'],
   color: ['Couleur', 'Color'],
   price: ['Prix', 'Price'],
-  link: ['Lien', 'Link', 'URL']
+  link: ['Lien', 'Link', 'URL'],
+  status: ['Statut', 'Status', 'Date']
 };

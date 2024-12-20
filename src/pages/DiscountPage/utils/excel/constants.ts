@@ -1,18 +1,18 @@
-export const PRICE_LINKS_COLUMNS = {
+export const DISCOUNT_EXCEL_COLUMNS = {
   reference: ['Reference', 'Référence', 'REF'],
-  title: ['Titre', 'Title', 'Désignation'],
+  title: ['Titre', 'Title'],
   brand: ['Marque', 'Brand'],
-  price: ['Prix', 'Price'],
-  shipping: ['Livraison', 'Shipping'],
-  url: ['Lien', 'URL', 'Link'],
-  date: ['Date Scraping', 'Date']
-};
-
-export const PRICE_ANALYSIS_COLUMNS = {
-  reference: ['Reference', 'Référence', 'REF'],
-  title: ['Titre', 'Title', 'Désignation'],
-  brand: ['Marque', 'Brand'],
-  priceArlettie: ['Prix Arlettie', 'Prix de vente'],
-  priceBrand: ['Prix Marque', 'Prix public'],
-  googleAverage: ['Moyenne Google', 'Prix Google moyen']
+  category: ['Categorie', 'Category'],
+  priceArlettie: ['Prix Arlettie'],
+  priceBrand: ['Prix Marque'],
+  // Premier concurrent
+  title1: ['Titre 1'],
+  price1: ['Prix 1'],
+  link1: ['Lien 1'],
+  site1: ['Site 1'],
+  // Deuxième concurrent
+  title2: ['Titre 2'],
+  price2: ['Prix 2'],
+  link2: ['Lien 2'],
+  site2: ['Site 2']
 };

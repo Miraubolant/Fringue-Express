@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
-import { getTotalItemsCount, getCategoryItemsCount, getUniqueBrandsCount } from '../utils/analytics';
+import { 
+  getCategoryItemsCount, 
+  getDiscountItemsCount,
+  getUniqueBrandsCount 
+} from '../utils/analytics';
 
 export const useAnalyticsStats = () => {
-  const [totalItems, setTotalItems] = useState<number>(0);
-  const [categoryItems, setCategoryItems] = useState<number>(0);
+  const [categoryCount, setCategoryCount] = useState<number>(0);
+  const [discountCount, setDiscountCount] = useState<number>(0);
   const [brandCount, setBrandCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -11,13 +15,13 @@ export const useAnalyticsStats = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [itemsCount, categoryCount, brandsCount] = await Promise.all([
-          getTotalItemsCount(),
+        const [catCount, discCount, brandsCount] = await Promise.all([
           getCategoryItemsCount(),
+          getDiscountItemsCount(),
           getUniqueBrandsCount()
         ]);
-        setTotalItems(itemsCount);
-        setCategoryItems(categoryCount);
+        setCategoryCount(catCount);
+        setDiscountCount(discCount);
         setBrandCount(brandsCount);
         setLoading(false);
       } catch (err) {
@@ -27,7 +31,11 @@ export const useAnalyticsStats = () => {
     };
 
     fetchStats();
+
+    // Rafraîchir les données toutes les 30 secondes
+    const interval = setInterval(fetchStats, 30000);
+    return () => clearInterval(interval);
   }, []);
 
-  return { totalItems, categoryItems, brandCount, loading, error };
+  return { categoryCount, discountCount, brandCount, loading, error };
 };

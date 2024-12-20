@@ -21,8 +21,8 @@ const navigation = [
   {
     category: 'Analyse',
     items: [
-      { name: 'Tri Catégorie', href: '/category', icon: Filter },
-      { name: 'Tri Remise', href: '/discount', icon: Percent },
+      { name: 'Articles Seconde Main', href: '/category', icon: Filter },
+      { name: 'Remise Arlettie', href: '/discount', icon: Percent },
       { name: 'Voir Data', href: '/data', icon: Database }
     ]
   }

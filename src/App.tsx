@@ -1,17 +1,26 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthForm } from './components/auth/AuthForm';
 import { PrivateRoute } from './components/layout/PrivateRoute';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 import { Dashboard } from './pages/Dashboard';
-import { DiscountPage } from './pages/DiscountPage';
 import { CategoryPage } from './pages/CategoryPage';
+import { DiscountPage } from './pages/DiscountPage';
 import { DataPage } from './pages/DataPage';
 import { useAuth } from './hooks/useAuth';
+import { useFavoritesStore } from './store/favoritesStore';
 import { LoadingScreen } from './components/ui/LoadingScreen';
 
 const App: React.FC = () => {
-  const { initialized } = useAuth();
+  const { initialized, user } = useAuth();
+  const { loadFavorites } = useFavoritesStore();
+
+  // Charger les favoris au démarrage si l'utilisateur est connecté
+  useEffect(() => {
+    if (user) {
+      loadFavorites();
+    }
+  }, [user, loadFavorites]);
 
   if (!initialized) {
     return <LoadingScreen />;

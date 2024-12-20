@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { LogOut, Bell, Search } from 'lucide-react';
+import { LogOut, User, Star, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useSidebarStore } from '../../store/sidebarStore';
 import { useLocation } from 'react-router-dom';
+import { useFavoritesStore } from '../../store/favoritesStore';
 
 const getPageTitle = (pathname: string): string => {
   switch (pathname) {
     case '/dashboard':
       return 'Tableau de bord';
     case '/discount':
-      return 'Tri par remise';
+      return 'Remise Arlettie';
     case '/category':
-      return 'Tri par catégorie';
+      return 'Articles Seconde Main';
     case '/data':
       return 'Données';
     default:
@@ -20,11 +21,13 @@ const getPageTitle = (pathname: string): string => {
 };
 
 export const Header: React.FC = () => {
-  const { signOut } = useAuthStore();
+  const { user, signOut } = useAuthStore();
   const { isCollapsed } = useSidebarStore();
+  const { getFavoritesCount, clearFavorites } = useFavoritesStore();
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const pageTitle = getPageTitle(location.pathname);
+  const favoritesCount = getFavoritesCount();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -54,23 +57,35 @@ export const Header: React.FC = () => {
             <h1 className="text-xl font-semibold text-white">{pageTitle}</h1>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
-              title="Rechercher"
-            >
-              <Search className="w-5 h-5" />
-            </button>
-            
-            <button
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
-              title="Notifications"
-            >
-              <Bell className="w-5 h-5" />
-            </button>
+          <div className="flex items-center gap-4">
+            {/* Favoris */}
+            {favoritesCount > 0 && (
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                  <Star className="w-4 h-4 text-yellow-400" fill="currentColor" />
+                  <span className="text-sm font-medium text-yellow-400">
+                    {favoritesCount} favori{favoritesCount > 1 ? 's' : ''}
+                  </span>
+                </div>
+                <button
+                  onClick={clearFavorites}
+                  className="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                  title="Réinitialiser les favoris"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            )}
 
-            <div className="h-6 w-px bg-gray-700/50 mx-2" />
+            {/* Email de l'utilisateur */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800/50">
+              <User className="w-4 h-4 text-gray-400" />
+              <span className="text-sm font-medium text-gray-300">
+                {user?.email}
+              </span>
+            </div>
 
+            {/* Déconnexion */}
             <button
               onClick={() => signOut()}
               className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700/50 rounded-lg transition-all duration-200"

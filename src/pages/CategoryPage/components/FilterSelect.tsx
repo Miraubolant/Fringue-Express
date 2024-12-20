@@ -1,26 +1,31 @@
 import React from 'react';
-import { getStateLabel } from '../../pages/CategoryPage/utils/excel/stateMapping';
+import { getStateLabel } from '../utils/excel/stateMapping';
+import { normalizeColor } from '../utils/colorNormalizer';
 
 interface FilterSelectProps {
   label: string;
   value: string | null;
   options: string[];
   onChange: (value: string | null) => void;
-  type?: 'state' | 'default';
+  type?: 'state' | 'color' | 'default';
 }
 
 export const FilterSelect: React.FC<FilterSelectProps> = ({
   label,
   value,
-  options = [], // Valeur par défaut pour éviter l'erreur
+  options = [],
   onChange,
   type = 'default'
 }) => {
   const getDisplayValue = (option: string) => {
-    if (type === 'state') {
-      return getStateLabel(option);
+    switch (type) {
+      case 'state':
+        return getStateLabel(option);
+      case 'color':
+        return option === 'Autre' ? 'Autre' : option;
+      default:
+        return option;
     }
-    return option;
   };
 
   return (
@@ -33,7 +38,7 @@ export const FilterSelect: React.FC<FilterSelectProps> = ({
                  hover:bg-gray-700/50 hover:border-gray-600/50"
     >
       <option value="">{label}</option>
-      {Array.isArray(options) && options.map(option => (
+      {Array.from(new Set(options)).sort().map(option => (
         <option 
           key={option} 
           value={option} 

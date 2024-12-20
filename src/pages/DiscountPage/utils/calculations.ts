@@ -3,8 +3,7 @@ export const calculateDiscountedPrice = (price: number, discountPercentage: numb
   return price * (1 - discountPercentage / 100);
 };
 
-export const calculateMargin = (priceBrand: number, priceArlettie: number, discountPercentage: number | null): number => {
+export const calculateMargin = (priceBrand: number, priceArlettie: number): number => {
   if (priceBrand <= 0) return 0;
-  const discountedPrice = calculateDiscountedPrice(priceArlettie, discountPercentage);
-  return ((priceBrand - discountedPrice) / priceBrand) * 100;
+  return ((priceBrand - priceArlettie) / priceBrand) * 100;
 };
