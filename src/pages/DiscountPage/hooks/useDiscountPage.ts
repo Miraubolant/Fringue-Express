@@ -10,8 +10,8 @@ export const useDiscountPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [sortConfig, setSortConfig] = useState<SortConfig>({
-    key: 'reference',
-    direction: 'ascending'
+    key: 'margin',
+    direction: 'descending'
   });
   const [filters, setFilters] = useState<FilterConfig>({
     search: '',

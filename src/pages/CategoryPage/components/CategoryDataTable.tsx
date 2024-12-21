@@ -12,7 +12,6 @@ interface CategoryDataTableProps {
     states: string[];
     materials: string[];
     colors: string[];
-    statuses: string[];
   };
   onFilterChange: (filters: FilterState) => void;
   onSort: (key: keyof CategoryItem) => void;
@@ -33,21 +32,23 @@ export const CategoryDataTable: React.FC<CategoryDataTableProps> = ({
   isImporting
 }) => {
   return (
-    <div className="space-y-4">
-      <CategoryFilters
-        filters={filters}
-        onFilterChange={onFilterChange}
-        options={filterOptions}
-        onImport={onImport}
-        isImporting={isImporting}
-      />
+    <div className="max-w-[1400px] mx-auto">
+      <div className="space-y-4">
+        <CategoryFilters
+          filters={filters}
+          onFilterChange={onFilterChange}
+          options={filterOptions}
+          onImport={onImport}
+          isImporting={isImporting}
+        />
 
-      <CategoryTable
-        items={items}
-        sortConfig={sortConfig}
-        onSort={onSort}
-        onDelete={onDelete}
-      />
+        <CategoryTable
+          items={items}
+          sortConfig={sortConfig}
+          onSort={onSort}
+          onDelete={onDelete}
+        />
+      </div>
     </div>
   );
 };

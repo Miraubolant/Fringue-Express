@@ -25,19 +25,21 @@ export const DiscountTable: React.FC<DiscountTableProps> = ({
 
   return (
     <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <DiscountTableHeader sortConfig={sortConfig} onSort={onSort} />
-          <tbody className="divide-y divide-gray-700/50">
-            {paginatedItems.map((item, index) => (
-              <DiscountTableRow 
-                key={`${item.reference}-${index}`} 
-                item={item} 
-                index={index}
-              />
-            ))}
-          </tbody>
-        </table>
+      <div className="relative overflow-x-auto">
+        <div className="min-w-[1040px]">
+          <table className="w-full">
+            <DiscountTableHeader sortConfig={sortConfig} onSort={onSort} />
+            <tbody className="divide-y divide-gray-700/50">
+              {paginatedItems.map((item, index) => (
+                <DiscountTableRow 
+                  key={`${item.reference}-${index}`} 
+                  item={item} 
+                  index={index}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Pagination */}

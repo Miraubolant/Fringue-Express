@@ -1,22 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { LogOut, User, Star, Trash2 } from 'lucide-react';
+import { LogOut, User, Star, Trash2, Database } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useSidebarStore } from '../../store/sidebarStore';
 import { useLocation } from 'react-router-dom';
 import { useFavoritesStore } from '../../store/favoritesStore';
+import { DataManager } from '../admin/DataManager';
 
-const getPageTitle = (pathname: string): string => {
+const getPageTitle = (pathname: string): { title: string; subtitle: string } => {
   switch (pathname) {
     case '/dashboard':
-      return 'Tableau de bord';
+      return {
+        title: 'Tableau de bord',
+        subtitle: 'Vue d\'ensemble de vos données'
+      };
     case '/discount':
-      return 'Remise Arlettie';
+      return {
+        title: 'Remise Arlettie',
+        subtitle: 'Analysez et optimisez vos marges'
+      };
     case '/category':
-      return 'Articles Seconde Main';
+      return {
+        title: 'Articles Seconde Main',
+        subtitle: 'Gérez vos articles Vinted et Vestiaire Collectif'
+      };
     case '/data':
-      return 'Données';
+      return {
+        title: 'Données',
+        subtitle: 'Accédez à vos données brutes'
+      };
     default:
-      return '';
+      return {
+        title: '',
+        subtitle: ''
+      };
   }
 };
 
@@ -25,9 +41,11 @@ export const Header: React.FC = () => {
   const { isCollapsed } = useSidebarStore();
   const { getFavoritesCount, clearFavorites } = useFavoritesStore();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [showDataManager, setShowDataManager] = useState(false);
   const location = useLocation();
-  const pageTitle = getPageTitle(location.pathname);
+  const { title, subtitle } = getPageTitle(location.pathname);
   const favoritesCount = getFavoritesCount();
+  const isAdmin = user?.email === 'victor@mirault.com';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,7 +59,7 @@ export const Header: React.FC = () => {
   return (
     <header 
       className={`
-        fixed top-0 left-0 right-0 z-50 h-16
+        fixed top-0 left-0 right-0 z-50 h-20
         transition-all duration-300 ease-in-out
         ${isScrolled 
           ? 'bg-gray-900/95 backdrop-blur-lg shadow-lg shadow-black/10' 
@@ -53,8 +71,15 @@ export const Header: React.FC = () => {
         <div className={`transition-all duration-300 ease-in-out ${isCollapsed ? 'w-20' : 'w-64'}`} />
 
         <div className="flex-1 flex items-center justify-between px-6">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-semibold text-white">{pageTitle}</h1>
+          <div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+              {title}
+            </h1>
+            {subtitle && (
+              <p className="mt-1 text-sm text-gray-400">
+                {subtitle}
+              </p>
+            )}
           </div>
 
           <div className="flex items-center gap-4">
@@ -74,6 +99,26 @@ export const Header: React.FC = () => {
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
+              </div>
+            )}
+
+            {/* Gestionnaire de données (admin) */}
+            {isAdmin && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowDataManager(!showDataManager)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800/50 text-gray-300 hover:text-white hover:bg-gray-700/50 transition-colors"
+                >
+                  <Database className="w-4 h-4" />
+                  <span className="text-sm font-medium">Base de données</span>
+                </button>
+
+                {showDataManager && (
+                  <DataManager 
+                    userEmail={user.email || ''} 
+                    onClose={() => setShowDataManager(false)}
+                  />
+                )}
               </div>
             )}
 

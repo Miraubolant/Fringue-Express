@@ -1,14 +1,12 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { CategoryItem, FilterState, SortConfig } from '../types';
 import { parseCategoryExcel } from '../utils/excel/parseCategoryExcel';
 import { saveCategoryItems, getCategoryItems, deleteCategoryItem } from '../../../services/firebase/categoryItems';
-import { getAllMaterials } from '../utils/materialNormalizer';
-import { getAllColors } from '../utils/colorNormalizer';
 
 export const useCategoryPage = () => {
   const [items, setItems] = useState<CategoryItem[]>([]);
-  const [isImporting, setIsImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
   const [importStats, setImportStats] = useState<{ added: number; skipped: number; } | null>(null);
   
   const [sortConfig, setSortConfig] = useState<SortConfig>({
@@ -22,7 +20,8 @@ export const useCategoryPage = () => {
     state: null,
     material: null,
     color: null,
-    status: null
+    dateRange: { start: null, end: null },
+    source: null
   });
 
   // Charger les données initiales
@@ -38,16 +37,15 @@ export const useCategoryPage = () => {
     loadItems();
   }, []);
 
-  // Options de filtres
+  // Options de filtrage
   const filterOptions = useMemo(() => ({
     brands: [...new Set(items.map(item => item.brand))].sort(),
     states: [...new Set(items.map(item => item.state))].sort(),
-    materials: getAllMaterials(),
-    colors: getAllColors(),
-    statuses: [...new Set(items.map(item => item.status).filter(Boolean))].sort()
+    materials: [...new Set(items.map(item => item.material))].sort(),
+    colors: [...new Set(items.map(item => item.color))].sort()
   }), [items]);
 
-  // Filtrer et trier les éléments
+  // Filtrage et tri des éléments
   const filteredAndSortedItems = useMemo(() => {
     let result = [...items];
 
@@ -76,8 +74,15 @@ export const useCategoryPage = () => {
       result = result.filter(item => item.color === filters.color);
     }
 
-    if (filters.status) {
-      result = result.filter(item => item.status === filters.status);
+    // Filtre par source
+    if (filters.source) {
+      result = result.filter(item => {
+        if (!item.link) return false;
+        const url = item.link.toLowerCase();
+        return filters.source === 'vinted' 
+          ? url.includes('vinted')
+          : url.includes('vestiairecollective');
+      });
     }
 
     // Appliquer le tri
@@ -115,8 +120,8 @@ export const useCategoryPage = () => {
       try {
         const importedItems = await parseCategoryExcel(files);
         const stats = await saveCategoryItems(importedItems);
-        setImportStats(stats);
         setItems(prevItems => [...prevItems, ...importedItems]);
+        setImportStats(stats);
       } catch (err) {
         setError((err as Error).message);
       } finally {

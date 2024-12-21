@@ -6,6 +6,7 @@ import { calculateMargin, calculateDiscountedPrice } from '../utils/calculations
 import { useDiscountStore } from '../../../store/discountStore';
 import { useCartStore } from '../../../store/cartStore';
 import { CompetitorLinksList } from './CompetitorLinksList';
+import { truncateTitle } from '../../../utils/string';
 
 interface DiscountTableRowProps {
   item: RemiseItem;
@@ -20,6 +21,7 @@ export const DiscountTableRow: React.FC<DiscountTableRowProps> = ({ item, index 
   const discountedPrice = calculateDiscountedPrice(item.priceArlettie, discountPercentage);
   const margin = calculateMargin(item.priceBrand, discountedPrice);
   const inCart = isInCart(item.reference);
+  const hasLinks = item.competitorLinks && item.competitorLinks.length > 0;
 
   const getMarginColor = (margin: number) => {
     if (margin >= 50) return 'text-green-400 bg-green-500/10';
@@ -27,8 +29,6 @@ export const DiscountTableRow: React.FC<DiscountTableRowProps> = ({ item, index 
     if (margin < 0) return 'text-red-400 bg-red-500/10';
     return 'text-gray-400 bg-gray-500/10';
   };
-
-  const hasLinks = item.competitorLinks && item.competitorLinks.length > 0;
 
   const handleCartClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -44,17 +44,19 @@ export const DiscountTableRow: React.FC<DiscountTableRowProps> = ({ item, index 
       <tr 
         onClick={() => hasLinks && setIsExpanded(!isExpanded)}
         className={`
+          relative h-[72px] min-h-[72px]
           ${hasLinks ? 'cursor-pointer' : ''}
           ${inCart ? 'bg-blue-500/10 hover:bg-blue-500/20' : 'hover:bg-gray-700/20'}
           transition-colors duration-200
         `}
       >
-        <td className="px-6 py-4">
+        {/* Colonne Article */}
+        <td className="sticky left-0 z-20 px-6 py-4 w-[400px] bg-inherit">
           <div className="flex items-center gap-3">
             <button
               onClick={handleCartClick}
               className={`
-                p-1.5 rounded-lg transition-all duration-200
+                p-1.5 rounded-lg flex-shrink-0 transition-all duration-200
                 ${inCart 
                   ? 'bg-blue-500 text-white hover:bg-blue-600' 
                   : 'bg-gray-700/50 text-gray-400 hover:bg-gray-700 hover:text-white'}
@@ -63,41 +65,67 @@ export const DiscountTableRow: React.FC<DiscountTableRowProps> = ({ item, index 
               <ShoppingCart className="w-4 h-4" />
             </button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               {hasLinks && (
-                <div className="text-gray-400">
+                <div className="text-gray-400 flex-shrink-0">
                   {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 </div>
               )}
-              <div>
-                <div className="text-sm text-white font-medium">{item.title}</div>
-                <div className="text-xs text-gray-400">{item.reference}</div>
+              <div className="min-w-0">
+                <div className="text-sm text-white font-medium truncate" title={item.title}>
+                  {truncateTitle(item.title, 50)}
+                </div>
+                <div className="text-xs text-gray-400 truncate">
+                  {item.reference}
+                </div>
               </div>
             </div>
           </div>
         </td>
-        <td className="px-6 py-4 text-sm text-gray-300">{item.brand}</td>
-        <td className="px-6 py-4 text-sm text-right">
-          {discountPercentage ? (
-            <div>
-              <div className="font-medium text-green-400">{formatPrice(discountedPrice)}</div>
-              <div className="text-xs text-gray-400 line-through">{formatPrice(item.priceArlettie)}</div>
-            </div>
-          ) : (
-            <div className="font-medium text-white">{formatPrice(item.priceArlettie)}</div>
-          )}
+
+        {/* Colonne Marque */}
+        <td className="sticky left-[400px] z-20 px-6 py-4 w-[140px] text-sm text-gray-300 bg-inherit border-l border-gray-700/50">
+          {item.brand}
         </td>
-        <td className="px-6 py-4 text-sm text-white text-right">{formatPrice(item.priceBrand)}</td>
-        <td className="px-6 py-4 text-sm text-right">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getMarginColor(margin)}`}>
+
+        {/* Colonne Prix Arlettie */}
+        <td className="px-6 py-4 text-sm text-right w-[200px]">
+          <div className="flex items-center justify-end gap-3">
+            <div>
+              {discountPercentage ? (
+                <div className="space-y-1">
+                  <div className="font-medium text-green-400">{formatPrice(discountedPrice)}</div>
+                  <div className="text-xs text-gray-400 line-through">{formatPrice(item.priceArlettie)}</div>
+                </div>
+              ) : (
+                <div className="font-medium text-white">{formatPrice(item.priceArlettie)}</div>
+              )}
+            </div>
+            {discountPercentage && (
+              <span className="px-2 py-1 text-xs font-medium rounded-lg bg-green-500/10 text-green-400 whitespace-nowrap">
+                -{discountPercentage}%
+              </span>
+            )}
+          </div>
+        </td>
+
+        {/* Colonne Prix Marque */}
+        <td className="px-6 py-4 text-sm text-white text-right w-[180px]">
+          {formatPrice(item.priceBrand)}
+        </td>
+
+        {/* Colonne Marge */}
+        <td className="px-6 py-4 text-sm text-right w-[120px]">
+          <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getMarginColor(margin)}`}>
             {formatPercentage(margin)}
           </span>
         </td>
       </tr>
 
+      {/* Détails des liens */}
       {isExpanded && hasLinks && (
         <tr className={inCart ? 'bg-blue-500/5' : 'bg-gray-800/30'}>
-          <td colSpan={5} className="px-6 py-4">
+          <td colSpan={5} className="p-3">
             <CompetitorLinksList links={item.competitorLinks} />
           </td>
         </tr>

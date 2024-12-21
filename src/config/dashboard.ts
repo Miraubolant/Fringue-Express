@@ -27,52 +27,23 @@ export const dashboardStats = [
 export const dashboardFeatures = [
   {
     title: 'Articles Seconde Main',
-    description: 'Organisez et analysez vos produits Vinted et Vestiaire Collectif.',
+    description: 'Analysez et gérez vos articles Vinted et Vestiaire Collectif. Importez vos données, filtrez par marque, état, matière et couleur. Suivez les prix et les tendances du marché de la seconde main.',
     icon: 'Filter',
     status: 'active' as const,
     link: '/category',
-    color: 'purple',
-    helpTitle: 'Format Excel requis',
-    helpSections: [
-      {
-        title: 'Catégorisation',
-        columns: [
-          { name: 'Titre/Title', required: true },
-          { name: 'Marque/Brand', required: true },
-          { name: 'État/State', required: true },
-          { name: 'Matière/Material', required: true },
-          { name: 'Couleur/Color', required: true },
-          { name: 'Prix/Price', required: true },
-          { name: 'Statut/Status', required: true },
-          { name: 'Lien/Link/URL', required: false }
-        ]
-      }
-    ]
+    color: 'purple'
   },
   {
     title: 'Remise Arlettie',
-    description: 'Analysez vos produits en fonction des remises et optimisez vos marges.',
+    description: 'Optimisez vos marges en analysant les prix Arlettie. Simulez différents pourcentages de remise, comparez avec les prix marque et identifiez les meilleures opportunités de vente.',
     icon: 'Percent',
     status: 'active' as const,
     link: '/discount',
-    color: 'blue',
-    helpTitle: 'Format Excel requis',
-    helpSections: [
-      {
-        title: 'Analyse des prix',
-        columns: [
-          { name: 'Reference/REF', required: true },
-          { name: 'Titre/Title', required: true },
-          { name: 'Marque/Brand', required: true },
-          { name: 'Prix Arlettie', required: true },
-          { name: 'Prix Marque', required: true }
-        ]
-      }
-    ]
+    color: 'blue'
   },
   {
     title: 'Données brutes',
-    description: 'Accédez à l\'ensemble de vos données d\'analyse pour des études plus approfondies.',
+    description: 'Accédez à l\'ensemble de vos données d\'analyse pour des études plus approfondies. Exportez vos données, créez des rapports personnalisés et suivez l\'évolution de vos performances.',
     icon: 'Database',
     status: 'active' as const,
     link: '/data',

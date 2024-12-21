@@ -7,7 +7,13 @@ export interface CategoryItem {
   color: string;
   price: number;
   link: string | null;
-  status: string | null; // Ajout du champ status
+  status: string | null;
+  source?: 'vinted' | 'vestiaire' | null;
+}
+
+export interface DateRange {
+  start: Date | null;
+  end: Date | null;
 }
 
 export interface FilterState {
@@ -16,7 +22,8 @@ export interface FilterState {
   state: string | null;
   material: string | null;
   color: string | null;
-  status: string | null; // Ajout du filtre status
+  dateRange: DateRange;
+  source: 'vinted' | 'vestiaire' | null;
 }
 
 export interface SortConfig {

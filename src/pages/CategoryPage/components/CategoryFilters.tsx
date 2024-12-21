@@ -1,8 +1,9 @@
 import React from 'react';
-import { Search, Upload, X } from 'lucide-react';
+import { Search, Upload, X, ExternalLink } from 'lucide-react';
 import { FilterState } from '../types';
 import { Input } from '../../../components/ui/Input';
 import { FilterSelect } from './FilterSelect';
+import { DateRangePicker } from '../../../components/ui/DateRangePicker';
 
 interface CategoryFiltersProps {
   filters: FilterState;
@@ -12,7 +13,6 @@ interface CategoryFiltersProps {
     states: string[];
     materials: string[];
     colors: string[];
-    statuses: string[];
   };
   onImport: (files: FileList) => void;
   isImporting: boolean;
@@ -26,20 +26,20 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
   isImporting
 }) => {
   return (
-    <div className="bg-gradient-to-r from-gray-800/50 to-gray-800/30 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4 mb-4">
-      <div className="flex flex-col gap-4">
-        {/* Première ligne : Recherche et Import */}
-        <div className="flex items-center gap-4">
-          <div className="flex-1 relative">
+    <div className="max-w-[1400px] mx-auto bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50">
+      {/* Barre de recherche et import */}
+      <div className="p-4 border-b border-gray-700/50">
+        <div className="flex items-center gap-3">
+          <div className="relative flex-1 max-w-md">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
+              <Search className="h-4 w-4 text-gray-400" />
             </div>
             <Input
               type="text"
               placeholder="Rechercher un article..."
               value={filters.search || ''}
               onChange={(e) => onFilterChange({ ...filters, search: e.target.value })}
-              className="pl-10 h-10 bg-gray-800/50 border-gray-700/50 focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20"
+              className="pl-9 h-9 bg-gray-800/50 border-gray-700/50 focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20"
             />
             {filters.search && (
               <button
@@ -51,9 +51,48 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
             )}
           </div>
 
+          {/* Filtres par source */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => onFilterChange({ 
+                ...filters, 
+                source: filters.source === 'vinted' ? null : 'vinted'
+              })}
+              className={`
+                flex items-center gap-2 px-3 py-1.5 rounded-lg
+                transition-all duration-200
+                ${filters.source === 'vinted'
+                  ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                  : 'bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20'
+                }
+              `}
+            >
+              <ExternalLink className="w-4 h-4" />
+              <span className="text-sm">Vinted</span>
+            </button>
+
+            <button
+              onClick={() => onFilterChange({ 
+                ...filters, 
+                source: filters.source === 'vestiaire' ? null : 'vestiaire'
+              })}
+              className={`
+                flex items-center gap-2 px-3 py-1.5 rounded-lg
+                transition-all duration-200
+                ${filters.source === 'vestiaire'
+                  ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30'
+                  : 'bg-orange-500/10 text-orange-400 border border-orange-500/20 hover:bg-orange-500/20'
+                }
+              `}
+            >
+              <ExternalLink className="w-4 h-4" />
+              <span className="text-sm">Vestiaire Collectif</span>
+            </button>
+          </div>
+
           <button
             className={`
-              relative overflow-hidden flex items-center gap-2 px-4 py-2 
+              relative overflow-hidden flex items-center gap-2 px-3 py-1.5
               bg-purple-500/10 hover:bg-purple-500/20 
               text-purple-400 hover:text-purple-300
               rounded-lg border border-purple-500/20 hover:border-purple-500/30
@@ -80,9 +119,12 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
             </span>
           </button>
         </div>
+      </div>
 
-        {/* Deuxième ligne : Filtres */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      {/* Filtres */}
+      <div className="p-4 space-y-3">
+        {/* Filtres de base */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <FilterSelect
             label="Marque"
             value={filters.brand}
@@ -109,11 +151,14 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
             onChange={(value) => onFilterChange({ ...filters, color: value })}
             type="color"
           />
-          <FilterSelect
-            label="Date de mise en ligne"
-            value={filters.status}
-            options={options.statuses}
-            onChange={(value) => onFilterChange({ ...filters, status: value })}
+        </div>
+
+        {/* Filtre par date */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-400">Période :</span>
+          <DateRangePicker
+            value={filters.dateRange}
+            onChange={(dateRange) => onFilterChange({ ...filters, dateRange })}
           />
         </div>
       </div>
