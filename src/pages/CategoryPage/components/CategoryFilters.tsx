@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Upload, X, ExternalLink } from 'lucide-react';
+import { Search, Upload, X } from 'lucide-react';
 import { FilterState } from '../types';
 import { Input } from '../../../components/ui/Input';
 import { FilterSelect } from './FilterSelect';
@@ -27,7 +27,6 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
 }) => {
   return (
     <div className="max-w-[1400px] mx-auto bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50">
-      {/* Barre de recherche et import */}
       <div className="p-4 border-b border-gray-700/50">
         <div className="flex items-center gap-3">
           <div className="relative flex-1 max-w-md">
@@ -67,7 +66,6 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
                 }
               `}
             >
-              <ExternalLink className="w-4 h-4" />
               <span className="text-sm">Vinted</span>
             </button>
 
@@ -85,7 +83,6 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
                 }
               `}
             >
-              <ExternalLink className="w-4 h-4" />
               <span className="text-sm">Vestiaire Collectif</span>
             </button>
           </div>

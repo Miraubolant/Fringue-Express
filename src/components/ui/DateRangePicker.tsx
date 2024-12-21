@@ -41,6 +41,13 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
     });
   };
 
+  const getDisplayText = () => {
+    if (!value.start && !value.end) return 'Sélectionner une période';
+    if (value.start && value.end) return `${formatDate(value.start)} - ${formatDate(value.end)}`;
+    if (value.start) return `À partir du ${formatDate(value.start)}`;
+    return `Jusqu'au ${formatDate(value.end)}`;
+  };
+
   const handleApply = () => {
     onChange(tempRange);
     setIsOpen(false);
@@ -53,33 +60,20 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
     setIsOpen(false);
   };
 
-  // Calculer la position du popup
   const getPopupPosition = () => {
     if (!triggerRef.current) return {};
     
     const rect = triggerRef.current.getBoundingClientRect();
     const spaceBelow = window.innerHeight - rect.bottom;
-    const spaceAbove = rect.top;
-    const idealHeight = 400; // Hauteur idéale du popup
+    const idealHeight = 400;
     
-    // Si l'espace en dessous est suffisant, placer le popup en dessous
-    if (spaceBelow >= idealHeight) {
-      return {
-        top: `${rect.bottom + 8}px`,
-        left: `${rect.left}px`
-      };
-    }
-    
-    // Sinon, placer le popup au-dessus
-    return {
-      bottom: `${window.innerHeight - rect.top + 8}px`,
-      left: `${rect.left}px`
-    };
+    return spaceBelow >= idealHeight
+      ? { top: `${rect.bottom + 8}px`, left: `${rect.left}px` }
+      : { bottom: `${window.innerHeight - rect.top + 8}px`, left: `${rect.left}px` };
   };
 
   return (
     <>
-      {/* Bouton déclencheur */}
       <button
         ref={triggerRef}
         onClick={() => setIsOpen(!isOpen)}
@@ -93,32 +87,18 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
         `}
       >
         <CalendarIcon className="w-4 h-4 text-gray-400" />
-        <span className="text-sm">
-          {value.start || value.end ? (
-            <>
-              {formatDate(value.start)} - {formatDate(value.end)}
-            </>
-          ) : (
-            'Sélectionner une période'
-          )}
-        </span>
+        <span className="text-sm whitespace-nowrap">{getDisplayText()}</span>
       </button>
 
-      {/* Popup du calendrier */}
       {isOpen && createPortal(
         <div
           ref={popupRef}
           className="fixed p-6 rounded-xl bg-gray-800/95 backdrop-blur-sm
                      border border-gray-700/50 shadow-xl z-[99999]
                      min-w-[320px] max-w-[90vw]"
-          style={{
-            ...getPopupPosition(),
-            maxHeight: '90vh',
-            overflowY: 'auto'
-          }}
+          style={getPopupPosition()}
         >
           <div className="space-y-4">
-            {/* Titre */}
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-white">
                 Sélectionner une période
@@ -131,10 +111,9 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
               </button>
             </div>
 
-            {/* Sélection de la date de début */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-300">
-                Date de début
+                Date de début (optionnel)
               </label>
               <input
                 type="date"
@@ -150,10 +129,9 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
               />
             </div>
 
-            {/* Sélection de la date de fin */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-300">
-                Date de fin
+                Date de fin (optionnel)
               </label>
               <input
                 type="date"
@@ -170,7 +148,6 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
               />
             </div>
 
-            {/* Actions */}
             <div className="flex items-center justify-between pt-4 border-t border-gray-700/50">
               <button
                 onClick={handleClear}

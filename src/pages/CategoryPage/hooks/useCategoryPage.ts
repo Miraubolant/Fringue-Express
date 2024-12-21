@@ -1,15 +1,13 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { CategoryItem, FilterState, SortConfig } from '../types';
-import { parseCategoryExcel } from '../utils/excel/parseCategoryExcel';
+import { parseDate } from '../utils/dateFilter';
+import { getSourceFromItem } from '../utils/sourceDetector';
 import { saveCategoryItems, getCategoryItems, deleteCategoryItem } from '../../../services/firebase/categoryItems';
-import { getDateValue } from '../../../utils/dateSorter';
 
 export const useCategoryPage = () => {
   const [items, setItems] = useState<CategoryItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isImporting, setIsImporting] = useState(false);
-  const [importStats, setImportStats] = useState<{ added: number; skipped: number; } | null>(null);
-  
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: 'status',
     direction: 'descending'
@@ -41,19 +39,11 @@ export const useCategoryPage = () => {
     loadItems();
   }, []);
 
-  // Options de filtrage
-  const filterOptions = useMemo(() => ({
-    brands: [...new Set(items.map(item => item.brand))].sort(),
-    states: [...new Set(items.map(item => item.state))].sort(),
-    materials: [...new Set(items.map(item => item.material))].sort(),
-    colors: [...new Set(items.map(item => item.color))].sort()
-  }), [items]);
-
   // Filtrage et tri des éléments
   const filteredAndSortedItems = useMemo(() => {
     let result = [...items];
 
-    // Appliquer les filtres
+    // Filtrage par recherche
     if (filters.search) {
       const searchTerm = filters.search.toLowerCase();
       result = result.filter(item => 
@@ -62,54 +52,44 @@ export const useCategoryPage = () => {
       );
     }
 
+    // Filtrage par source (Vinted/Vestiaire)
+    if (filters.source) {
+      result = result.filter(item => getSourceFromItem(item) === filters.source);
+    }
+
+    // Autres filtres
     if (filters.brand) {
       result = result.filter(item => item.brand === filters.brand);
     }
-
     if (filters.state) {
       result = result.filter(item => item.state === filters.state);
     }
-
     if (filters.material) {
       result = result.filter(item => item.material === filters.material);
     }
-
     if (filters.color) {
       result = result.filter(item => item.color === filters.color);
     }
 
-    if (filters.source) {
-      result = result.filter(item => item.source === filters.source);
-    }
-
-    // Filtre par date
+    // Filtrage par date
     if (filters.dateRange.start || filters.dateRange.end) {
       result = result.filter(item => {
-        const itemDate = getDateValue(item.status);
-        
-        if (filters.dateRange.start && filters.dateRange.end) {
-          return itemDate >= filters.dateRange.start.getTime() && 
-                 itemDate <= filters.dateRange.end.getTime();
-        }
-        
-        if (filters.dateRange.start) {
-          return itemDate >= filters.dateRange.start.getTime();
-        }
-        
-        if (filters.dateRange.end) {
-          return itemDate <= filters.dateRange.end.getTime();
-        }
+        const itemDate = parseDate(item.status);
+        if (!itemDate) return false;
 
-        return true;
+        const startOk = !filters.dateRange.start || itemDate >= filters.dateRange.start.getTime();
+        const endOk = !filters.dateRange.end || itemDate <= filters.dateRange.end.getTime();
+        
+        return startOk && endOk;
       });
     }
 
-    // Appliquer le tri
+    // Tri
     result.sort((a, b) => {
       if (sortConfig.key === 'status') {
-        const dateA = getDateValue(a.status);
-        const dateB = getDateValue(b.status);
-        return sortConfig.direction === 'ascending' ? dateA - dateB : dateB - dateA;
+        const aDate = parseDate(a.status) || 0;
+        const bDate = parseDate(b.status) || 0;
+        return sortConfig.direction === 'ascending' ? aDate - bDate : bDate - aDate;
       }
 
       const aValue = a[sortConfig.key];
@@ -123,11 +103,21 @@ export const useCategoryPage = () => {
     return result;
   }, [items, filters, sortConfig]);
 
+  // Options de filtrage
+  const filterOptions = useMemo(() => ({
+    brands: [...new Set(items.map(item => item.brand))].sort(),
+    states: [...new Set(items.map(item => item.state))].sort(),
+    materials: [...new Set(items.map(item => item.material))].sort(),
+    colors: [...new Set(items.map(item => item.color))].sort()
+  }), [items]);
+
   return {
     items: filteredAndSortedItems,
+    filterOptions,
     sortConfig,
     filters,
-    filterOptions,
+    error,
+    isImporting,
     setFilters,
     handleSort: useCallback((key: keyof CategoryItem) => {
       setSortConfig(current => ({
@@ -140,13 +130,11 @@ export const useCategoryPage = () => {
     handleImport: useCallback(async (files: FileList) => {
       setIsImporting(true);
       setError(null);
-      setImportStats(null);
 
       try {
         const importedItems = await parseCategoryExcel(files);
-        const stats = await saveCategoryItems(importedItems);
+        await saveCategoryItems(importedItems);
         setItems(current => [...current, ...importedItems]);
-        setImportStats(stats);
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -160,9 +148,6 @@ export const useCategoryPage = () => {
       } catch (err) {
         setError((err as Error).message);
       }
-    }, []),
-    isImporting,
-    error,
-    importStats
+    }, [])
   };
 };
