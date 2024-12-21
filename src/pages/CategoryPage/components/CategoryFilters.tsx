@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Upload, X } from 'lucide-react';
+import { Search, Upload, X, RefreshCw } from 'lucide-react';
 import { FilterState } from '../types';
 import { Input } from '../../../components/ui/Input';
 import { FilterSelect } from './FilterSelect';
@@ -25,6 +25,30 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
   onImport,
   isImporting
 }) => {
+  const handleResetFilters = () => {
+    onFilterChange({
+      search: null,
+      brand: null,
+      state: null,
+      material: null,
+      color: null,
+      dateRange: {
+        start: null,
+        end: null
+      },
+      source: null
+    });
+  };
+
+  const hasActiveFilters = filters.search || 
+    filters.brand || 
+    filters.state || 
+    filters.material || 
+    filters.color || 
+    filters.dateRange.start || 
+    filters.dateRange.end || 
+    filters.source;
+
   return (
     <div className="max-w-[1400px] mx-auto bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50">
       <div className="p-4 border-b border-gray-700/50">
@@ -86,6 +110,22 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
               <span className="text-sm">Vestiaire Collectif</span>
             </button>
           </div>
+
+          {/* Bouton de réinitialisation des filtres */}
+          {hasActiveFilters && (
+            <button
+              onClick={handleResetFilters}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg
+                       bg-red-500/10 hover:bg-red-500/20 
+                       text-red-400 hover:text-red-300
+                       border border-red-500/20 hover:border-red-500/30
+                       transition-all duration-200"
+              title="Réinitialiser tous les filtres"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span className="text-sm">Réinitialiser</span>
+            </button>
+          )}
 
           <button
             className={`
