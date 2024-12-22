@@ -20,7 +20,7 @@ export const useDiscountPage = () => {
 
   const { discountPercentage } = useDiscountStore();
 
-  // Charger les données au montage
+  // Load initial data
   useEffect(() => {
     const loadItems = async () => {
       try {
@@ -41,7 +41,7 @@ export const useDiscountPage = () => {
   const filteredAndSortedItems = useMemo(() => {
     let result = [...items];
 
-    // Appliquer les filtres
+    // Apply filters
     if (filters.search) {
       const searchTerm = filters.search.toLowerCase();
       result = result.filter(item => 
@@ -54,7 +54,7 @@ export const useDiscountPage = () => {
       result = result.filter(item => item.brand === filters.brand);
     }
 
-    // Calculer les marges pour le tri
+    // Calculate margins for sorting
     const itemsWithMargin = result.map(item => ({
       ...item,
       calculatedMargin: calculateMargin(
@@ -63,12 +63,11 @@ export const useDiscountPage = () => {
       )
     }));
 
-    // Appliquer le tri
+    // Apply sorting
     itemsWithMargin.sort((a, b) => {
       let aValue = a[sortConfig.key];
       let bValue = b[sortConfig.key];
 
-      // Utiliser la marge calculée pour le tri si nécessaire
       if (sortConfig.key === 'margin') {
         aValue = a.calculatedMargin;
         bValue = b.calculatedMargin;
@@ -79,12 +78,12 @@ export const useDiscountPage = () => {
       return 0;
     });
 
-    // Retourner les items sans la marge calculée
     return itemsWithMargin.map(({ calculatedMargin, ...item }) => item);
   }, [items, filters, sortConfig, discountPercentage]);
 
   return {
     items: filteredAndSortedItems,
+    allItems: items,
     sortConfig,
     filters,
     availableBrands,

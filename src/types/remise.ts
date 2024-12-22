@@ -12,17 +12,8 @@ export interface RemiseItem {
   brand: string;
   priceArlettie: number;
   priceBrand: number;
+  imageUrl: string | null; // Changed from optional to nullable
   competitorLinks: CompetitorLink[];
   createdAt?: any;
   updatedAt?: any;
-}
-
-export interface SortConfig {
-  key: keyof RemiseItem;
-  direction: 'ascending' | 'descending';
-}
-
-export interface FilterConfig {
-  search: string;
-  brand: string | null;
 }

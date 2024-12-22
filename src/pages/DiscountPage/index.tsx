@@ -7,10 +7,10 @@ import { useDiscountPage } from './hooks/useDiscountPage';
 export const DiscountPage: React.FC = () => {
   const {
     items,
+    allItems,
     sortConfig,
     filters,
     availableBrands,
-    availableCategories,
     handleSort,
     handleImport,
     setFilters,
@@ -32,9 +32,10 @@ export const DiscountPage: React.FC = () => {
             filters={filters}
             onFilterChange={setFilters}
             availableBrands={availableBrands}
-            availableCategories={availableCategories}
             onImport={handleImport}
             isImporting={isImporting}
+            totalItems={allItems.length}
+            filteredItems={items.length}
           />
 
           <DiscountTable

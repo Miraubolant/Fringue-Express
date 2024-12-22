@@ -18,6 +18,8 @@ interface CategoryDataTableProps {
   onDelete: (id: string) => void;
   onImport: (files: FileList) => void;
   isImporting: boolean;
+  totalItems: number;
+  filteredItems: number;
 }
 
 export const CategoryDataTable: React.FC<CategoryDataTableProps> = ({
@@ -29,7 +31,9 @@ export const CategoryDataTable: React.FC<CategoryDataTableProps> = ({
   onSort,
   onDelete,
   onImport,
-  isImporting
+  isImporting,
+  totalItems,
+  filteredItems
 }) => {
   return (
     <div className="max-w-[1400px] mx-auto">
@@ -40,6 +44,8 @@ export const CategoryDataTable: React.FC<CategoryDataTableProps> = ({
           options={filterOptions}
           onImport={onImport}
           isImporting={isImporting}
+          totalItems={totalItems}
+          filteredItems={filteredItems}
         />
 
         <CategoryTable

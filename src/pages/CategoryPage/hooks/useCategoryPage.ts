@@ -3,6 +3,7 @@ import { CategoryItem, FilterState, SortConfig } from '../types';
 import { parseDate } from '../utils/dateFilter';
 import { getSourceFromItem } from '../utils/sourceDetector';
 import { saveCategoryItems, getCategoryItems, deleteCategoryItem } from '../../../services/firebase/categoryItems';
+import { parseCategoryExcel } from '../utils/excel/parseCategoryExcel';
 
 export const useCategoryPage = () => {
   const [items, setItems] = useState<CategoryItem[]>([]);
@@ -26,7 +27,7 @@ export const useCategoryPage = () => {
     source: null
   });
 
-  // Charger les données initiales
+  // Load initial data
   useEffect(() => {
     const loadItems = async () => {
       try {
@@ -39,11 +40,11 @@ export const useCategoryPage = () => {
     loadItems();
   }, []);
 
-  // Filtrage et tri des éléments
+  // Filter and sort items
   const filteredAndSortedItems = useMemo(() => {
     let result = [...items];
 
-    // Filtrage par recherche
+    // Search filter
     if (filters.search) {
       const searchTerm = filters.search.toLowerCase();
       result = result.filter(item => 
@@ -52,12 +53,12 @@ export const useCategoryPage = () => {
       );
     }
 
-    // Filtrage par source (Vinted/Vestiaire)
+    // Source filter (Vinted/Vestiaire)
     if (filters.source) {
       result = result.filter(item => getSourceFromItem(item) === filters.source);
     }
 
-    // Autres filtres
+    // Other filters
     if (filters.brand) {
       result = result.filter(item => item.brand === filters.brand);
     }
@@ -71,7 +72,7 @@ export const useCategoryPage = () => {
       result = result.filter(item => item.color === filters.color);
     }
 
-    // Filtrage par date
+    // Date range filter
     if (filters.dateRange.start || filters.dateRange.end) {
       result = result.filter(item => {
         const itemDate = parseDate(item.status);
@@ -84,7 +85,7 @@ export const useCategoryPage = () => {
       });
     }
 
-    // Tri
+    // Sort
     result.sort((a, b) => {
       if (sortConfig.key === 'status') {
         const aDate = parseDate(a.status) || 0;
@@ -103,7 +104,7 @@ export const useCategoryPage = () => {
     return result;
   }, [items, filters, sortConfig]);
 
-  // Options de filtrage
+  // Filter options
   const filterOptions = useMemo(() => ({
     brands: [...new Set(items.map(item => item.brand))].sort(),
     states: [...new Set(items.map(item => item.state))].sort(),
@@ -113,6 +114,7 @@ export const useCategoryPage = () => {
 
   return {
     items: filteredAndSortedItems,
+    allItems: items,
     filterOptions,
     sortConfig,
     filters,

@@ -3,6 +3,7 @@ import { RemiseItem, CompetitorLink } from '../../../types/remise';
 import { DISCOUNT_EXCEL_COLUMNS } from './constants';
 import { findColumnValue } from '../../../../utils/excel';
 import { parsePrice } from '../../../../utils/price';
+import { normalizeImageUrl } from '../imageUrl';
 
 export const parseDiscountExcel = async (file: File): Promise<RemiseItem[]> => {
   const data = await file.arrayBuffer();
@@ -19,6 +20,7 @@ export const parseDiscountExcel = async (file: File): Promise<RemiseItem[]> => {
       const priceBrand = parsePrice(findColumnValue(row, DISCOUNT_EXCEL_COLUMNS.priceBrand));
       if (priceArlettie <= 0 || priceBrand <= 0) return null;
 
+      const imageUrl = normalizeImageUrl(findColumnValue(row, DISCOUNT_EXCEL_COLUMNS.imageUrl));
       const competitorLinks: CompetitorLink[] = [];
 
       // Premier lien concurrent
@@ -55,9 +57,9 @@ export const parseDiscountExcel = async (file: File): Promise<RemiseItem[]> => {
         reference,
         title: findColumnValue(row, DISCOUNT_EXCEL_COLUMNS.title),
         brand: findColumnValue(row, DISCOUNT_EXCEL_COLUMNS.brand),
-        category: findColumnValue(row, DISCOUNT_EXCEL_COLUMNS.category),
         priceArlettie,
         priceBrand,
+        imageUrl,
         competitorLinks
       };
     })

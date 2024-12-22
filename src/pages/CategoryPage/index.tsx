@@ -7,6 +7,7 @@ import { SelectionAnalysis } from '../../components/analysis/SelectionAnalysis';
 export const CategoryPage: React.FC = () => {
   const {
     items,
+    allItems,
     sortConfig,
     filters,
     filterOptions,
@@ -41,6 +42,8 @@ export const CategoryPage: React.FC = () => {
         onDelete={handleDelete}
         onImport={handleImport}
         isImporting={isImporting}
+        totalItems={allItems.length}
+        filteredItems={items.length}
       />
 
       <SelectionAnalysis />

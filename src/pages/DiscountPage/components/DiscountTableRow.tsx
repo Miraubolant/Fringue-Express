@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, ShoppingCart } from 'lucide-react';
+import { ChevronDown, ChevronUp, ShoppingCart, ImageOff } from 'lucide-react';
 import { RemiseItem } from '../../../types/remise';
 import { formatPrice, formatPercentage } from '../../../utils/format';
 import { calculateMargin, calculateDiscountedPrice } from '../utils/calculations';
@@ -11,10 +11,16 @@ import { truncateTitle } from '../../../utils/string';
 interface DiscountTableRowProps {
   item: RemiseItem;
   index: number;
+  onImageClick: (src: string, alt: string) => void;
 }
 
-export const DiscountTableRow: React.FC<DiscountTableRowProps> = ({ item, index }) => {
+export const DiscountTableRow: React.FC<DiscountTableRowProps> = ({ 
+  item, 
+  index,
+  onImageClick 
+}) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const { discountPercentage } = useDiscountStore();
   const { addItem, removeItem, isInCart } = useCartStore();
   
@@ -50,7 +56,7 @@ export const DiscountTableRow: React.FC<DiscountTableRowProps> = ({ item, index 
           transition-colors duration-200
         `}
       >
-        {/* Colonne Article */}
+        {/* Article Column */}
         <td className="sticky left-0 z-20 px-6 py-4 w-[400px] bg-inherit">
           <div className="flex items-center gap-3">
             <button
@@ -64,6 +70,28 @@ export const DiscountTableRow: React.FC<DiscountTableRowProps> = ({ item, index 
             >
               <ShoppingCart className="w-4 h-4" />
             </button>
+
+            {/* Image */}
+            {item.imageUrl && !imageError ? (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onImageClick(item.imageUrl!, item.title);
+                }}
+                className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-800 hover:ring-2 hover:ring-blue-500/50 transition-all duration-200"
+              >
+                <img
+                  src={item.imageUrl}
+                  alt={item.title}
+                  className="w-full h-full object-cover"
+                  onError={() => setImageError(true)}
+                />
+              </button>
+            ) : (
+              <div className="w-12 h-12 rounded-lg bg-gray-800 flex items-center justify-center flex-shrink-0">
+                <ImageOff className="w-6 h-6 text-gray-600" />
+              </div>
+            )}
 
             <div className="flex items-center gap-2 min-w-0">
               {hasLinks && (
@@ -83,12 +111,11 @@ export const DiscountTableRow: React.FC<DiscountTableRowProps> = ({ item, index 
           </div>
         </td>
 
-        {/* Colonne Marque */}
+        {/* Rest of the columns remain unchanged */}
         <td className="sticky left-[400px] z-20 px-6 py-4 w-[140px] text-sm text-gray-300 bg-inherit border-l border-gray-700/50">
           {item.brand}
         </td>
 
-        {/* Colonne Prix Arlettie */}
         <td className="px-6 py-4 text-sm text-right w-[200px]">
           <div className="flex items-center justify-end gap-3">
             <div>
@@ -109,12 +136,10 @@ export const DiscountTableRow: React.FC<DiscountTableRowProps> = ({ item, index 
           </div>
         </td>
 
-        {/* Colonne Prix Marque */}
         <td className="px-6 py-4 text-sm text-white text-right w-[180px]">
           {formatPrice(item.priceBrand)}
         </td>
 
-        {/* Colonne Marge */}
         <td className="px-6 py-4 text-sm text-right w-[120px]">
           <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getMarginColor(margin)}`}>
             {formatPercentage(margin)}
@@ -122,7 +147,7 @@ export const DiscountTableRow: React.FC<DiscountTableRowProps> = ({ item, index 
         </td>
       </tr>
 
-      {/* Détails des liens */}
+      {/* Expanded details */}
       {isExpanded && hasLinks && (
         <tr className={inCart ? 'bg-blue-500/5' : 'bg-gray-800/30'}>
           <td colSpan={5} className="p-3">
