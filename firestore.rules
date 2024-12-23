@@ -2,37 +2,70 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Fonction helper pour vérifier l'authentification
+    // Helper functions
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Fonction helper pour vérifier si l'utilisateur est propriétaire
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Règles pour les paniers sauvegardés
+    function isAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isValidUser() {
+      return request.resource.data.keys().hasAll(['email', 'role', 'createdAt', 'updatedAt']) &&
+        request.resource.data.role in ['admin', 'manager', 'user'] &&
+        request.resource.data.email is string &&
+        request.resource.data.createdAt is timestamp &&
+        request.resource.data.updatedAt is timestamp;
+    }
+
+    // Users collection rules
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                   request.auth.uid == userId && 
+                   isValidUser();
+      allow update: if (isAdmin() || isOwner(userId)) && 
+                   isValidUser() &&
+                   (isAdmin() || request.resource.data.role == resource.data.role);
+      allow delete: if isAdmin() && 
+                   request.auth.uid != userId;
+    }
+
+    // Saved carts rules
     match /saved_carts/{cartId} {
       allow read: if isOwner(resource.data.userId);
-      allow create: if isOwner(request.resource.data.userId);
+      allow create: if isOwner(request.resource.data.userId) &&
+                   request.resource.data.keys().hasAll(['userId', 'name', 'items', 'createdAt']);
       allow delete: if isOwner(resource.data.userId);
     }
 
-    // Règles pour les favoris
+    // Favorites rules
     match /favorites/{userId} {
-      allow read, write: if isOwner(userId);
+      allow read: if isOwner(userId);
+      // Permettre toutes les opérations d'écriture si l'utilisateur est propriétaire
+      allow create, update, delete: if isOwner(userId);
     }
 
-    // Règles pour les articles (remise_items et category_items)
-    match /remise_items/{itemId} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
-    }
-
+    // Category items rules
     match /category_items/{itemId} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
+      allow create, update: if isAuthenticated() &&
+                          request.resource.data.keys().hasAll(['title', 'brand', 'state', 'price']);
+      allow delete: if isAdmin();
+    }
+
+    // Remise items rules
+    match /remise_items/{itemId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() &&
+                          request.resource.data.keys().hasAll(['reference', 'title', 'brand', 'priceArlettie', 'priceBrand']);
+      allow delete: if isAdmin();
     }
   }
 }

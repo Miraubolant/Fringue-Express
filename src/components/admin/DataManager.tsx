@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Trash2, AlertTriangle, Loader2, Database } from 'lucide-react';
 import { deleteCollection } from '../../services/firebase/admin';
 import { ScrollArea } from '../ui/ScrollArea';
+import { useUserRole } from '../../hooks/useUserRole';
+import { useAuthStore } from '../../store/authStore';
 
 const COLLECTIONS = [
   { id: 'category_items', name: 'Articles Seconde Main', icon: Database },
@@ -11,19 +13,17 @@ const COLLECTIONS = [
 ];
 
 interface DataManagerProps {
-  userEmail: string;
   onClose: () => void;
 }
 
-export const DataManager: React.FC<DataManagerProps> = ({ userEmail, onClose }) => {
+export const DataManager: React.FC<DataManagerProps> = ({ onClose }) => {
   const [selectedCollection, setSelectedCollection] = useState<string>('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Vérifier si l'utilisateur est autorisé
-  if (userEmail !== 'victor@mirault.com') return null;
+  const { user } = useAuthStore();
+  const { isAdmin } = useUserRole(user?.uid);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -53,6 +53,8 @@ export const DataManager: React.FC<DataManagerProps> = ({ userEmail, onClose }) 
       setIsDeleting(false);
     }
   };
+
+  if (!isAdmin) return null;
 
   return (
     <div 

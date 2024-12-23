@@ -8,6 +8,7 @@ import {
   User
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
+import { createUserDocument } from '../services/firebase/users';
 
 interface AuthState {
   user: User | null;
@@ -41,6 +42,8 @@ export const useAuthStore = create<AuthState>()(
         set({ loading: true, error: null });
         try {
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          // Créer le document utilisateur après l'inscription
+          await createUserDocument(userCredential.user);
           set({ user: userCredential.user, loading: false });
         } catch (error) {
           set({ error: (error as Error).message, loading: false });
