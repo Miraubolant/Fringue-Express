@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { auth } from '../lib/firebase';
-import { saveFavorites, getFavorites } from '../services/firebase/userPreferences';
+import { saveFavorites as saveFavoritesToFirebase, getFavorites as getFavoritesFromFirebase } from '../services/firebase/userPreferences';
 
 interface FavoritesState {
   favorites: string[];
@@ -17,6 +17,7 @@ interface FavoritesState {
 export const useFavoritesStore = create<FavoritesState>((set, get) => ({
   favorites: [],
   isLoading: false,
+
   addFavorite: async (id) => {
     const userId = auth.currentUser?.uid;
     if (!userId) return;
@@ -24,12 +25,13 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
     set({ isLoading: true });
     try {
       const newFavorites = [...get().favorites, id];
-      await saveFavorites(userId, newFavorites);
+      await saveFavoritesToFirebase(userId, newFavorites);
       set({ favorites: newFavorites });
     } finally {
       set({ isLoading: false });
     }
   },
+
   removeFavorite: async (id) => {
     const userId = auth.currentUser?.uid;
     if (!userId) return;
@@ -37,12 +39,13 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
     set({ isLoading: true });
     try {
       const newFavorites = get().favorites.filter(favId => favId !== id);
-      await saveFavorites(userId, newFavorites);
+      await saveFavoritesToFirebase(userId, newFavorites);
       set({ favorites: newFavorites });
     } finally {
       set({ isLoading: false });
     }
   },
+
   toggleFavorite: async (id) => {
     if (get().isFavorite(id)) {
       await get().removeFavorite(id);
@@ -50,27 +53,31 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
       await get().addFavorite(id);
     }
   },
+
   isFavorite: (id) => get().favorites.includes(id),
+  
   getFavoritesCount: () => get().favorites.length,
+
   loadFavorites: async () => {
     const userId = auth.currentUser?.uid;
     if (!userId) return;
 
     set({ isLoading: true });
     try {
-      const favorites = await getFavorites(userId);
+      const favorites = await getFavoritesFromFirebase(userId);
       set({ favorites });
     } finally {
       set({ isLoading: false });
     }
   },
+
   clearFavorites: async () => {
     const userId = auth.currentUser?.uid;
     if (!userId) return;
 
     set({ isLoading: true });
     try {
-      await saveFavorites(userId, []);
+      await saveFavoritesToFirebase(userId, []);
       set({ favorites: [] });
     } finally {
       set({ isLoading: false });

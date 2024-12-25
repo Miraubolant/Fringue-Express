@@ -1,9 +1,10 @@
 import React from 'react';
-import { X, TrendingUp, Package, DollarSign, Percent } from 'lucide-react';
+import { X, TrendingUp, Package, DollarSign, Percent, Save } from 'lucide-react';
 import { useSelectionStore } from '../../store/selectionStore';
 import { useDiscountStore } from '../../store/discountStore';
 import { formatPrice, formatPercentage } from '../../utils/format';
 import { calculateSelectionStats } from '../../utils/calculations';
+import { SaveFavoritesButton } from '../favorites/SaveFavoritesButton';
 
 export const SelectionAnalysis: React.FC = () => {
   const { selectedItems, clearSelection } = useSelectionStore();
@@ -33,18 +34,21 @@ export const SelectionAnalysis: React.FC = () => {
             )}
           </div>
           
-          <button
-            onClick={clearSelection}
-            className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <SaveFavoritesButton items={selectedItems} />
+            <button
+              onClick={clearSelection}
+              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
             <div className="flex items-center gap-3 text-gray-400 mb-2">
-              <Percent className="w-5 h-5" />
+              <Percent className="w-4 h-4" />
               <span className="text-sm font-medium">Marge moyenne</span>
             </div>
             <div className={`text-2xl font-bold ${
@@ -56,7 +60,7 @@ export const SelectionAnalysis: React.FC = () => {
 
           <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
             <div className="flex items-center gap-3 text-gray-400 mb-2">
-              <TrendingUp className="w-5 h-5" />
+              <TrendingUp className="w-4 h-4" />
               <span className="text-sm font-medium">Articles rentables</span>
             </div>
             <div className="text-2xl font-bold text-blue-400">
@@ -66,7 +70,7 @@ export const SelectionAnalysis: React.FC = () => {
 
           <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
             <div className="flex items-center gap-3 text-gray-400 mb-2">
-              <Package className="w-5 h-5" />
+              <Package className="w-4 h-4" />
               <span className="text-sm font-medium">Total Arlettie</span>
             </div>
             <div>
@@ -83,7 +87,7 @@ export const SelectionAnalysis: React.FC = () => {
 
           <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
             <div className="flex items-center gap-3 text-gray-400 mb-2">
-              <DollarSign className="w-5 h-5" />
+              <DollarSign className="w-4 h-4" />
               <span className="text-sm font-medium">Bénéfice total</span>
             </div>
             <div className={`text-2xl font-bold ${

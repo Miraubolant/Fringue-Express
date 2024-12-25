@@ -1,20 +1,56 @@
 import React from 'react';
-import { Database } from 'lucide-react';
+import { useDataPage } from './hooks/useDataPage';
+import { DataTable } from './components/DataTable';
+import { ComparisonZone } from '../../components/comparison/ComparisonZone';
+import { DataFilters } from './components/DataFilters';
+import { SavedCartsSection } from '../../components/cart/SavedCartsSection';
+import { FavoritesSection } from '../../components/favorites/FavoritesSection';
 
 export const DataPage: React.FC = () => {
+  const { 
+    items, 
+    currentPage, 
+    totalPages,
+    filters,
+    availableBrands,
+    setCurrentPage,
+    setFilters,
+    loading, 
+    error,
+    totalItems,
+    filteredCount
+  } = useDataPage();
+
   return (
-    <div className="min-h-[calc(100vh-10rem)] flex items-center justify-center p-6">
-      <div className="flex flex-col items-center justify-center p-12 bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 max-w-lg w-full">
-        <div className="w-16 h-16 flex items-center justify-center bg-emerald-500/10 rounded-xl mb-4">
-          <Database className="w-8 h-8 text-emerald-400" />
+    <div className="pt-24 pb-32 space-y-6">
+      {error && (
+        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+          <p className="text-sm text-red-400">{error}</p>
         </div>
-        <h2 className="text-xl font-semibold text-white mb-2">
-          En cours de développement
-        </h2>
-        <p className="text-gray-400 text-center">
-          Cette fonctionnalité sera bientôt disponible. Elle vous permettra d'accéder à l'ensemble de vos données pour des analyses approfondies.
-        </p>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <SavedCartsSection />
+        <FavoritesSection />
       </div>
+
+      <DataFilters
+        filters={filters}
+        onFilterChange={setFilters}
+        brands={availableBrands}
+        totalItems={totalItems}
+        filteredItems={filteredCount}
+      />
+
+      <ComparisonZone />
+
+      <DataTable 
+        items={items}
+        loading={loading}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };
