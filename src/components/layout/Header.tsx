@@ -5,6 +5,7 @@ import { useUserRole } from '../../hooks/useUserRole';
 import { DataManager } from '../admin/DataManager';
 import { RoleManager } from '../admin/RoleManager';
 import { UserMenu } from './UserMenu';
+import { HeaderActions } from './HeaderActions';
 
 export const Header: React.FC = () => {
   const { user, signOut } = useAuthStore();
@@ -14,8 +15,9 @@ export const Header: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-40 h-16 bg-gray-900/95 backdrop-blur-lg border-b border-gray-800/50">
-      <div className="h-full max-w-screen-2xl mx-auto px-4 md:px-6 flex items-center justify-end">
-        {/* Actions */}
+      <div className="h-full max-w-screen-2xl mx-auto px-4 md:px-6 flex items-center justify-between">
+        <HeaderActions />
+
         <div className="flex items-center gap-4">
           {/* Admin Actions */}
           {isAdmin && (
